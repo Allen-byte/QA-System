@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.questions.mapper.QuestionsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.example.questions.entity.Questions">
+        <id column="id" property="id" />
+        <result column="title" property="title" />
+        <result column="posedTime" property="posedtime" />
+        <result column="pose_date" property="posedate" />
+        <result column="uid" property="uid" />
+        <result column="description" property="description" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, title, posedTime, description, uid, pose_date
+    </sql>
+
+<!--    根据uid查询对应的提问后统计出次数，再根据limit查询相应数量的记录 -->
+    <select id="getRecords" resultType="com.example.questions.entity.recordsQ">
+        select pose_date, count(*) as count from questions
+        where uid = #{uid} group by pose_date
+        LIMIT #{limit}
+    </select>
+
+<!--    根据uid查询对应用户的提问信息-->
+    <select id="queryInfo" resultType="com.example.questions.entity.QuestionShow">
+        select t3.uid, t3.permission, t3.account, t1.id qid, t1.description, t3.username, t4.avatar, t1.posedTime pose_time, t1.title question, count(t2.qid) count
+        from questions t1 left join answers t2 on t1.id = t2.qid
+            inner join user t3 on t3.uid = t1.uid
+            inner join avatar t4 on t4.uid = t3.uid
+        ${ew.customSqlSegment}
+        group by t1.id
+        order by t1.id desc
+    </select>
+</mapper>

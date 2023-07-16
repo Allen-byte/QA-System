@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.questions.mapper.AnswersMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.example.questions.entity.Answers">
+        <id column="id" property="id" />
+        <result column="qid" property="qid" />
+        <result column="uid" property="uid" />
+        <result column="answer" property="answer" />
+        <result column="answer_time" property="answerTime" />
+        <result column="answer_date" property="answerDate" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, qid, uid, answer, answer_time, answer_date
+    </sql>
+
+    <!--    根据uid查询对应的回答后统计出次数，再根据limit查询相应数量的记录 -->
+    <select id="getRecords" resultType="com.example.questions.entity.recordsA">
+        select answer_date, count(*) as count from answers
+        where uid = #{uid} group by answer_date
+            LIMIT #{limit}
+    </select>
+
+<!--    根据uid获取用户回答记录,这里的id是answer的id，用于到时候编辑和删除回答用-->
+    <select id="getMyAnswers" resultType="com.example.questions.entity.AnswerShow">
+        select t1.id, t1.uid, t1.qid, t2.title, t1.answer, t1.answer_time
+        from answers t1 left join questions t2
+            on t1.qid = t2.id
+        where t1.uid = #{id}
+        order by t1.answer_time desc
+    </select>
+
+<!--    根据qid获取某个问题下的全部回答-->
+    <select id="getAll" resultType="com.example.questions.entity.viewAnswers">
+        select t1.uid id, t2.permission, t1.answer, t1.answer_time, t2.username, t3.avatar
+        from answers t1 left join user t2 on t1.uid = t2.uid
+                        left join avatar t3 on t3.uid = t2.uid
+        where t1.qid = #{qid}
+    </select>
+
+<!--    管理端获取回答以及相关的提问和用户信息-->
+    <select id="answersAll" resultType="com.example.questions.entity.answerAll">
+        select t1.id, t1.answer, t1.answer_date, t1.answer_time answerTime, t3.username, t3.account, t2.title
+        from answers t1 left join questions t2 on t1.qid=t2.id
+                        left join user t3 on t1.uid=t3.uid
+        ${ew.customSqlSegment}
+    </select>
+
+</mapper>

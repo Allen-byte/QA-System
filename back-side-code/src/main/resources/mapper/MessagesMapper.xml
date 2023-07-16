@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.questions.mapper.MessagesMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.example.questions.entity.Messages">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="message" property="message" />
+        <result column="time" property="time" />
+        <result column="flag" property="flag" />
+        <result column="date" property="date" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, message, time, flag, date
+    </sql>
+
+<!--    管理端查询全部消息-->
+    <select id="allMessages" resultType="com.example.questions.entity.messageShow">
+        select t1.id mid, t2.uid, t2.username, t2.account, t1.message, t1.flag, t1.time
+        from messages t1 left join user t2 on t1.uid=t2.uid
+        ${ew.customSqlSegment}
+        order by t1.time desc
+    </select>
+</mapper>
